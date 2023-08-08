@@ -4,25 +4,31 @@ import pygame
 
 pygame.init()
 
+# Definindo constantes
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+SQUARE_SIZE = 15
+VEL_GAME = 15
+SNAKE_HEAD_RADIUS = SQUARE_SIZE // 1.45
+FOOD_SIZE = SQUARE_SIZE
+SCORE_PER_FOOD = 1
+
+# Definindo cores
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
 
 class SnakeGame:
     def __init__(self):
         pygame.display.set_caption("Snake Game")
-        self.width, self.height = 1200, 800
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
 
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
-        self.green = (0, 255, 0)
-        self.red = (255, 0, 0)
-
-        self.square_size = 10
-        self.vel_game = 15
-
         self.end_game = False
-        self.x = self.width / 2
-        self.y = self.height / 2
+        self.x = SCREEN_WIDTH / 2
+        self.y = SCREEN_HEIGHT / 2
         self.vel_x = 0
         self.vel_y = 0
 
@@ -35,70 +41,74 @@ class SnakeGame:
 
     def generate_food(self):
         food_x = round(
-            random.randrange(
-                self.square_size, self.width - self.square_size, self.square_size
-            )
+            random.randrange(SQUARE_SIZE, SCREEN_WIDTH - SQUARE_SIZE, SQUARE_SIZE)
         )
         food_y = round(
-            random.randrange(
-                self.square_size, self.height - self.square_size, self.square_size
-            )
+            random.randrange(SQUARE_SIZE, SCREEN_HEIGHT - SQUARE_SIZE, SQUARE_SIZE)
         )
         return food_x, food_y
 
     def draw_food(self):
         pygame.draw.rect(
             self.screen,
-            self.green,
-            [self.food_x, self.food_y, self.square_size, self.square_size],
+            GREEN,
+            [self.food_x, self.food_y, FOOD_SIZE, FOOD_SIZE],
         )
 
     def draw_snake(self):
         for pixel in self.pixels:
             pygame.draw.circle(
                 self.screen,
-                self.black,
-                (pixel[0] + self.square_size // 2, pixel[1] + self.square_size // 2),
-                self.square_size // 2,
+                BLACK,
+                (pixel[0] + SQUARE_SIZE // 2, pixel[1] + SQUARE_SIZE // 2),
+                SQUARE_SIZE // 2,
             )
 
         # Desenhar a cabeça da cobra (o último pixel) com um tamanho maior para melhorar a aparência
         pygame.draw.circle(
             self.screen,
-            self.black,
+            BLACK,
             (
-                self.pixels[-1][0] + self.square_size // 2,
-                self.pixels[-1][1] + self.square_size // 2,
+                self.pixels[-1][0] + SQUARE_SIZE // 2,
+                self.pixels[-1][1] + SQUARE_SIZE // 2,
             ),
-            self.square_size // 1.45,
+            SNAKE_HEAD_RADIUS,
         )
 
     def draw_score(self):
         font = pygame.font.SysFont("monospace", 20)
-        text = font.render("Score: " + str(self.snake_size), True, self.red)
+        text = font.render("Score: " + str(self.snake_size), True, RED)
         self.screen.blit(text, (1, 1))
 
     def select_vel(self, key):
-        oposites = {
+        opposites = {
             pygame.K_UP: pygame.K_DOWN,
             pygame.K_DOWN: pygame.K_UP,
             pygame.K_LEFT: pygame.K_RIGHT,
             pygame.K_RIGHT: pygame.K_LEFT,
         }
 
-        if key != oposites.get(self.direction):
+        if key != opposites.get(self.direction):
             self.direction = key
 
         return {
-            pygame.K_UP: (0, -self.square_size),
-            pygame.K_DOWN: (0, self.square_size),
-            pygame.K_LEFT: (-self.square_size, 0),
-            pygame.K_RIGHT: (self.square_size, 0),
+            pygame.K_UP: (0, -SQUARE_SIZE),
+            pygame.K_DOWN: (0, SQUARE_SIZE),
+            pygame.K_LEFT: (-SQUARE_SIZE, 0),
+            pygame.K_RIGHT: (SQUARE_SIZE, 0),
         }.get(self.direction, (0, 0))
+
+    def game_over(self):
+        font = pygame.font.SysFont("monospace", 50)
+        text = font.render("Game Over", True, RED)
+        self.screen.blit(text, (SCREEN_WIDTH // 2 - 120, SCREEN_HEIGHT // 2))
+        pygame.display.update()
+        pygame.time.wait(2000)  # Aguarda 2 segundos
+        self.end_game = True
 
     def run(self):
         while not self.end_game:
-            self.screen.fill(self.white)
+            self.screen.fill(WHITE)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -112,11 +122,11 @@ class SnakeGame:
             # Atualizar a posição da cobra
             if (
                 self.x < 0
-                or self.x >= self.width
+                or self.x >= SCREEN_WIDTH
                 or self.y < 0
-                or self.y >= self.height
+                or self.y >= SCREEN_HEIGHT
             ):
-                self.end_game = True
+                self.game_over()
 
             # Desenhar comida
             self.draw_food()
@@ -129,7 +139,7 @@ class SnakeGame:
             # Condição se a cobrinha bateu no próprio corpo
             for pixel in self.pixels[:-1]:
                 if pixel == [self.x, self.y]:
-                    self.end_game = True
+                    self.game_over()
 
             self.draw_snake()
 
@@ -140,11 +150,17 @@ class SnakeGame:
             pygame.display.update()
 
             # Criar uma nova comida
-            if self.x == self.food_x and self.y == self.food_y:
-                self.snake_size += 4
+            head_center = (self.x + SQUARE_SIZE // 2, self.y + SQUARE_SIZE // 2)
+            food_center = (self.food_x + FOOD_SIZE // 2, self.food_y + FOOD_SIZE // 2)
+            distance = (
+                (head_center[0] - food_center[0]) ** 2
+                + (head_center[1] - food_center[1]) ** 2
+            ) ** 0.5
+            if distance <= SNAKE_HEAD_RADIUS + FOOD_SIZE / 2:
+                self.snake_size += SCORE_PER_FOOD
                 self.food_x, self.food_y = self.generate_food()
 
-            self.clock.tick(self.vel_game)
+            self.clock.tick(VEL_GAME)
 
         pygame.quit()
 
