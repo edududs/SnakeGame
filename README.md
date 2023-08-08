@@ -57,8 +57,9 @@ This project is licensed under the MIT License.
 Contributions are welcome! If you encounter issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
 
 ## Credits
-Developed by Your Name.
+Developed by Eduardo Lima.
 
 ## Contact
 Email: dudulj@live.com
+
 GitHub: edududs
