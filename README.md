@@ -50,14 +50,15 @@ python main.py
 - main.py: The main file containing the SnakeGame class and the main game loop.
 - README.md: Project documentation (you are here!).
 - assets/: Directory that can contain resources like images, sounds, etc. (if needed).
+  
 ## License
-This project is licensed under the MIT License.
-
-## Contributions
-Contributions are welcome! If you encounter issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
+This project is licensed under the [MIT License](LICENSE).
 
 ## Credits
 Developed by Eduardo Lima.
+
+## Contributions
+Contributions are welcome! If you encounter issues or have suggestions for improvements, feel free to open an issue or submit a pull request.
 
 ## Contact
 Email: dudulj@live.com
